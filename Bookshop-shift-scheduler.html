@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Scheduler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --error: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #3b82f6;
+                --gray-50: #1a1a1a;
+                --gray-100: #262626;
+                --gray-200: #404040;
+                --gray-300: #525252;
+                --gray-600: #a3a3a3;
+                --gray-700: #d4d4d4;
+                --gray-900: #f5f5f5;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: var(--gray-900);
+        }
+
+        .subtitle {
+            color: var(--gray-600);
+            margin-bottom: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .panel {
+                background: #262626;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+        }
+
+        .panel h2 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: var(--gray-900);
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            font-size: 0.95em;
+            background: white;
+            color: var(--gray-900);
+            margin-bottom: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            input[type="text"],
+            input[type="date"],
+            input[type="number"],
+            select {
+                background: #1a1a1a;
+                border-color: #404040;
+                color: var(--gray-900);
+            }
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 6px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] + label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-200);
+            color: var(--gray-900);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray-300);
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: var(--error);
+            font-size: 0.85em;
+            padding: 6px 10px;
+        }
+
+        .btn-danger:hover {
+            background-color: #fecaca;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--gray-100);
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .list-item {
+                background: #1a1a1a;
+            }
+        }
+
+        .list-content {
+            flex: 1;
+        }
+
+        .list-title {
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+
+        .list-desc {
+            font-size: 0.85em;
+            color: var(--gray-600);
+            margin-top: 2px;
+        }
+
+        .schedule-grid {
+            overflow-x: auto;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        .schedule-table th {
+            background-color: var(--gray-200);
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-900);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .schedule-table th {
+                background-color: #1a1a1a;
+                border-color: #404040;
+            }
+        }
+
+        .schedule-table td {
+            padding: 10px;
+            border: 1px solid var(--gray-300);
+            background-color: white;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .schedule-table td {
+                background-color: #1a1a1a;
+                border-color: #404040;
+            }
+        }
+
+        .schedule-table tr:nth-child(even) td {
+            background-color: var(--gray-100);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .schedule-table tr:nth-child(even) td {
+                background-color: #0a0a0a;
+            }
+        }
+
+        .shift-cell {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: var(--gray-100);
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .stat-card {
+                background: #1a1a1a;
+            }
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: var(--gray-600);
+            margin-top: 4px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #0c4a6e;
+            border-left: 4px solid var(--primary);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .alert-info {
+                background-color: #1e3a8a;
+                color: #93c5fd;
+            }
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #7f1d1d;
+            border-left: 4px solid var(--error);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .alert-error {
+                background-color: #7f1d1d;
+                color: #fecaca;
+            }
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #166534;
+            border-left: 4px solid var(--success);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .alert-success {
+                background-color: #166534;
+                color: #86efac;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray-600);
+        }
+
+        .availability-dates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .date-tag {
+            background: var(--primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .date-tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .date-shift-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+            padding: 8px;
+            background: var(--gray-100);
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .date-shift-item {
+                background: #1a1a1a;
+            }
+        }
+
+        .date-shift-item label {
+            margin-bottom: 0;
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .import-section {
+            background: var(--gray-100);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .import-section {
+                background: #1a1a1a;
+            }
+        }
+
+        textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85em;
+            resize: vertical;
+            min-height: 80px;
+            background: white;
+            color: var(--gray-900);
+            margin-bottom: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            textarea {
+                background: #0a0a0a;
+                border-color: #404040;
+                color: var(--gray-900);
+            }
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .import-info {
+            font-size: 0.85em;
+            color: var(--gray-600);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Shift Scheduler</h1>
+        <p class="subtitle">Create fair, balanced shift schedules with dependency support</p>
+
+        <!-- Scheduling Period -->
+        <div class="panel" style="margin-bottom: 30px;">
+            <h2>Scheduling Period</h2>
+            <div class="two-col">
+                <div>
+                    <label>Start date:</label>
+                    <input type="date" id="startDate" />
+                </div>
+                <div>
+                    <label>End date:</label>
+                    <input type="date" id="endDate" />
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Input Panel -->
+            <div class="panel">
+                <h2>Setup</h2>
+
+                <!-- Import Data -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.1em; margin-bottom: 12px;">Import Data (Optional)</h3>
+                    <div class="import-section">
+                        <div class="import-info">Paste CSV data to import people and their availability. Format: Name,Date (YYYY-MM-DD),Shift (AM/PM)</div>
+                        <textarea id="csvImport" placeholder="John,2026-09-05,AM&#10;John,2026-09-05,PM&#10;Jane,2026-09-12,AM&#10;..."></textarea>
+                        <button class="btn btn-secondary" onclick="importFromCSV()">Import from Clipboard/Text</button>
+                    </div>
+                </div>
+
+                <!-- Add Person -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.1em; margin-bottom: 12px;">Add Person Manually</h3>
+                    <input type="text" id="personName" placeholder="Person's name" />
+                    <label>Available Fridays (check AM/PM for each):</label>
+                    <div id="dateCheckboxes"></div>
+                    <button class="btn btn-primary" onclick="addPerson()">Add Person</button>
+                </div>
+
+                <!-- People List -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.1em; margin-bottom: 12px;">People Registered</h3>
+                    <div id="peopleList" class="empty-state">No people added yet</div>
+                </div>
+
+                <!-- Add Dependencies -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.1em; margin-bottom: 12px;">Add Pairings</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label>Person A:</label>
+                            <select id="depPersonA">
+                                <option value="">Select person</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Person B:</label>
+                            <select id="depPersonB">
+                                <option value="">Select person</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addDependency()">Create Pairing</button>
+                </div>
+
+                <!-- Dependencies Summary -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.1em; margin-bottom: 12px;">Active Pairings</h3>
+                    <div id="dependenciesList" class="empty-state">No pairings set</div>
+                </div>
+
+                <button class="btn btn-primary" onclick="generateSchedule()" style="width: 100%; font-size: 1.05em; padding: 12px;">
+                    ✨ Generate Schedule
+                </button>
+            </div>
+
+            <!-- Schedule Panel -->
+            <div class="panel">
+                <h2>Schedule</h2>
+                <div id="scheduleContainer" class="empty-state">
+                    Add people and click "Generate Schedule" to see results
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        const state = {
+            people: [],
+            dateRange: [],
+            schedule: null
+        };
+
+        function initializeDates() {
+            const today = new Date();
+            today.setDate(today.getDate());
+            document.getElementById('startDate').valueAsDate = today;
+
+            const endDate = new Date(today);
+            endDate.setDate(endDate.getDate() + 27); // ~4 weeks
+            document.getElementById('endDate').valueAsDate = endDate;
+
+            updateDateCheckboxes();
+        }
+
+        function getNextFriday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -2 : 5); // adjust to Friday
+            return new Date(d.setDate(diff));
+        }
+
+        function updateDateCheckboxes() {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+
+            if (!startDate || !endDate || startDate > endDate) return;
+
+            const checkboxes = document.getElementById('dateCheckboxes');
+            checkboxes.innerHTML = '';
+
+            // Get first Friday on or after startDate
+            let current = new Date(startDate);
+            const dayOfWeek = current.getDay();
+            if (dayOfWeek !== 5) { // 5 is Friday
+                const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+                current.setDate(current.getDate() + (daysUntilFriday === 0 ? 7 : daysUntilFriday));
+            }
+
+            // Add all Fridays up to endDate
+            while (current <= endDate) {
+                const dateStr = current.toISOString().split('T')[0];
+                const dateLabel = current.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+                const div = document.createElement('div');
+                div.className = 'date-shift-item';
+                div.innerHTML = `
+                    <div><strong>${dateLabel}</strong></div>
+                    <label for="date-${dateStr}-AM">
+                        <input type="checkbox" id="date-${dateStr}-AM" value="${dateStr}-AM" />
+                        AM
+                    </label>
+                    <label for="date-${dateStr}-PM">
+                        <input type="checkbox" id="date-${dateStr}-PM" value="${dateStr}-PM" />
+                        PM
+                    </label>
+                `;
+                checkboxes.appendChild(div);
+                current.setDate(current.getDate() + 7); // Next Friday
+            }
+        }
+
+        function importFromCSV() {
+            const csvText = document.getElementById('csvImport').value.trim();
+            if (!csvText) {
+                alert('Please paste CSV data');
+                return;
+            }
+
+            const lines = csvText.split('\n').filter(line => line.trim());
+            const dataByPerson = new Map();
+
+            // Parse CSV: Name,Date,Shift
+            lines.forEach(line => {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length < 3) return;
+
+                const name = parts[0];
+                const date = parts[1];
+                const shift = parts[2].toUpperCase();
+
+                if (!dataByPerson.has(name)) {
+                    dataByPerson.set(name, []);
+                }
+
+                if (shift === 'AM' || shift === 'PM') {
+                    dataByPerson.get(name).push(`${date}-${shift}`);
+                }
+            });
+
+            // Add people to state
+            dataByPerson.forEach((shifts, name) => {
+                if (state.people.some(p => p.name === name)) {
+                    return; // Skip duplicates
+                }
+
+                const person = {
+                    id: Date.now() + Math.random(),
+                    name: name,
+                    availability: shifts,
+                    pairWith: null
+                };
+                state.people.push(person);
+            });
+
+            document.getElementById('csvImport').value = '';
+            updateUI();
+            alert(`Imported ${dataByPerson.size} people`);
+        }
+
+        function addPerson() {
+            const name = document.getElementById('personName').value.trim();
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
+
+            const selectedShifts = Array.from(document.querySelectorAll('#dateCheckboxes input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            if (selectedShifts.length === 0) {
+                alert('Please select at least one available shift');
+                return;
+            }
+
+            // Check if person already exists
+            if (state.people.some(p => p.name === name)) {
+                alert('Person already added');
+                return;
+            }
+
+            const person = {
+                id: Date.now(),
+                name: name,
+                availability: selectedShifts // Array of "YYYY-MM-DD-AM" or "YYYY-MM-DD-PM"
+            };
+
+            state.people.push(person);
+            document.getElementById('personName').value = '';
+            document.querySelectorAll('#dateCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+            updateUI();
+        }
+
+        function addDependency() {
+            const personA = document.getElementById('depPersonA').value;
+            const personB = document.getElementById('depPersonB').value;
+
+            if (!personA || !personB) {
+                alert('Please select two people');
+                return;
+            }
+
+            if (personA === personB) {
+                alert('Cannot pair someone with themselves');
+                return;
+            }
+
+            const personAObj = state.people.find(p => p.name === personA);
+            const personBObj = state.people.find(p => p.name === personB);
+
+            if (!personAObj || !personBObj) {
+                alert('One or both people not found');
+                return;
+            }
+
+            // Check if already paired
+            if (personAObj.pairWith === personB || personBObj.pairWith === personA) {
+                alert('This pairing already exists');
+                return;
+            }
+
+            // Create bidirectional pairing
+            personAObj.pairWith = personB;
+            personBObj.pairWith = personA;
+
+            document.getElementById('depPersonA').value = '';
+            document.getElementById('depPersonB').value = '';
+
+            updateUI();
+        }
+
+        function removeDependency(personAName) {
+            const personA = state.people.find(p => p.name === personAName);
+            if (!personA || !personA.pairWith) return;
+
+            const personB = state.people.find(p => p.name === personA.pairWith);
+
+            if (personA) personA.pairWith = null;
+            if (personB) personB.pairWith = null;
+
+            updateUI();
+        }
+
+        function removePerson(id) {
+            state.people = state.people.filter(p => p.id !== id);
+            updateUI();
+        }
+
+        function updateUI() {
+            // Update people list
+            const peopleList = document.getElementById('peopleList');
+            if (state.people.length === 0) {
+                peopleList.innerHTML = '<div class="empty-state">No people added yet</div>';
+            } else {
+                peopleList.innerHTML = state.people.map(p => `
+                    <div class="list-item">
+                        <div class="list-content">
+                            <div class="list-title">${p.name}</div>
+                            <div class="list-desc">${p.availability.length} shifts available${p.pairWith ? ' • Paired with ' + p.pairWith : ''}</div>
+                        </div>
+                        <button class="btn btn-danger" onclick="removePerson(${p.id})">Remove</button>
+                    </div>
+                `).join('');
+            }
+
+            // Update dependency dropdowns
+            const depPersonA = document.getElementById('depPersonA');
+            const depPersonB = document.getElementById('depPersonB');
+            const optionsHtml = state.people.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+
+            depPersonA.innerHTML = '<option value="">Select person</option>' + optionsHtml;
+            depPersonB.innerHTML = '<option value="">Select person</option>' + optionsHtml;
+
+            // Update pairings list (show each pair only once)
+            const deps = new Map();
+            state.people.forEach(p => {
+                if (p.pairWith) {
+                    const key = [p.name, p.pairWith].sort().join('|');
+                    deps.set(key, true);
+                }
+            });
+
+            const depsList = document.getElementById('dependenciesList');
+            if (deps.size === 0) {
+                depsList.innerHTML = '<div class="empty-state">No pairings set</div>';
+            } else {
+                depsList.innerHTML = Array.from(deps.keys()).map(key => {
+                    const [a, b] = key.split('|');
+                    return `
+                        <div class="list-item">
+                            <div class="list-content">
+                                <div class="list-title">${a} ↔ ${b}</div>
+                            </div>
+                            <button class="btn btn-danger" onclick="removeDependency('${a}')">Remove</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function generateSchedule() {
+            if (state.people.length === 0) {
+                alert('Please add at least 2 people');
+                return;
+            }
+
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+
+            if (!startDate || !endDate || startDate > endDate) {
+                alert('Please set a valid date range');
+                return;
+            }
+
+            // Build Friday-only date range
+            state.dateRange = [];
+            let current = new Date(startDate);
+            const dayOfWeek = current.getDay();
+            if (dayOfWeek !== 5) {
+                const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+                current.setDate(current.getDate() + (daysUntilFriday === 0 ? 7 : daysUntilFriday));
+            }
+
+            while (current <= endDate) {
+                state.dateRange.push(new Date(current));
+                current.setDate(current.getDate() + 7);
+            }
+
+            // Generate schedule using greedy allocation
+            state.schedule = createSchedule();
+            displaySchedule();
+        }
+
+        function createSchedule() {
+            const schedule = new Map();
+            const shiftCounts = new Map();
+            state.people.forEach(p => shiftCounts.set(p.id, 0));
+
+            // Create schedule entries for each shift
+            state.dateRange.forEach(date => {
+                const dateStr = date.toISOString().split('T')[0];
+                schedule.set(`${dateStr}-AM`, []);
+                schedule.set(`${dateStr}-PM`, []);
+            });
+
+            // Get people paired
+            const pairs = new Map();
+            const pairedPeople = new Map(); // Map person to their partner
+            state.people.forEach(p => {
+                if (p.pairWith) {
+                    const partner = state.people.find(x => x.name === p.pairWith);
+                    if (partner) {
+                        pairedPeople.set(p.id, partner);
+                    }
+                }
+            });
+
+            // Sort people by availability (fewest available shifts first) to prioritize constrained people
+            const sortedPeople = [...state.people].sort((a, b) => {
+                const aAvail = a.availability.length;
+                const bAvail = b.availability.length;
+                return aAvail - bAvail; // Ascending: less available first
+            });
+
+            // Priority-based allocation: ensure fair distribution
+            // Level 1: Everyone gets at least 1 shift
+            // Level 2: Everyone gets at least 2 shifts
+            // Level 3+: Continue until all shifts are filled
+
+            const maxPriority = state.dateRange.length * 2; // Maximum possible shifts
+
+            for (let priority = 1; priority <= maxPriority; priority++) {
+                // For this priority level, only consider people with fewer shifts, sorted by availability
+                const eligiblePeople = sortedPeople.filter(p => shiftCounts.get(p.id) < priority);
+
+                if (eligiblePeople.length === 0) break; // All people have this priority level or higher
+
+                state.dateRange.forEach(date => {
+                    const dateStr = date.toISOString().split('T')[0];
+
+                    ['AM', 'PM'].forEach(shift => {
+                        const key = `${dateStr}-${shift}`;
+                        const assigned = schedule.get(key);
+
+                        while (assigned.length < 2) {
+                            // Try to assign pairs together if both are eligible
+                            let assigned_pair = false;
+
+                            for (const person of eligiblePeople) {
+                                if (assigned.includes(person.name)) continue;
+                                if (!person.availability.includes(key)) continue;
+                                if (shiftCounts.get(person.id) >= priority) continue;
+
+                                const partner = pairedPeople.get(person.id);
+                                if (partner &&
+                                    !assigned.includes(partner.name) &&
+                                    partner.availability.includes(key) &&
+                                    shiftCounts.get(partner.id) < priority &&
+                                    eligiblePeople.some(p => p.id === partner.id)) {
+                                    // Both can work this shift
+                                    schedule.get(key).push(person.name, partner.name);
+                                    shiftCounts.set(person.id, shiftCounts.get(person.id) + 1);
+                                    shiftCounts.set(partner.id, shiftCounts.get(partner.id) + 1);
+                                    assigned_pair = true;
+                                    break;
+                                }
+                            }
+
+                            if (assigned_pair || assigned.length >= 2) continue;
+
+                            // Otherwise assign single person with fewest shifts
+                            const available = eligiblePeople.filter(p =>
+                                p.availability.includes(key) &&
+                                !assigned.includes(p.name) &&
+                                shiftCounts.get(p.id) < priority
+                            );
+
+                            if (available.length === 0) break;
+
+                            // Sort by who has fewest shifts (to balance within this priority)
+                            available.sort((a, b) => shiftCounts.get(a.id) - shiftCounts.get(b.id));
+
+                            const person = available[0];
+                            schedule.get(key).push(person.name);
+                            shiftCounts.set(person.id, shiftCounts.get(person.id) + 1);
+                        }
+                    });
+                });
+            }
+
+            return { schedule, shiftCounts };
+        }
+
+        function displaySchedule() {
+            if (!state.schedule) return;
+
+            const container = document.getElementById('scheduleContainer');
+            const { schedule, shiftCounts } = state.schedule;
+
+            let html = '';
+
+            // Check for understaffed shifts
+            const understaffed = [];
+            state.dateRange.forEach(date => {
+                const dateStr = date.toISOString().split('T')[0];
+                const amCount = schedule.get(`${dateStr}-AM`).length;
+                const pmCount = schedule.get(`${dateStr}-PM`).length;
+
+                if (amCount < 2) {
+                    const dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    understaffed.push(`${dateLabel} AM (${amCount}/2)`);
+                }
+                if (pmCount < 2) {
+                    const dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    understaffed.push(`${dateLabel} PM (${pmCount}/2)`);
+                }
+            });
+
+            if (understaffed.length > 0) {
+                html += `<div class="alert alert-error">⚠️ Not enough availability: ${understaffed.join(', ')} are understaffed. Consider adding more people or expanding availability.</div>`;
+            } else {
+                html += `<div class="alert alert-success">✓ All shifts are fully staffed with 2 people each</div>`;
+            }
+
+            html += '<div class="schedule-grid"><table class="schedule-table"><thead><tr><th>Date</th><th>AM Shift</th><th>PM Shift</th></tr></thead><tbody>';
+
+            state.dateRange.forEach(date => {
+                const dateStr = date.toISOString().split('T')[0];
+                const dateLabel = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const amShift = schedule.get(`${dateStr}-AM`);
+                const pmShift = schedule.get(`${dateStr}-PM`);
+
+                const amDisplay = amShift.length === 2 ? amShift.join(', ') : `${amShift.join(', ')} ${amShift.length < 2 ? '❌' : ''}`;
+                const pmDisplay = pmShift.length === 2 ? pmShift.join(', ') : `${pmShift.join(', ')} ${pmShift.length < 2 ? '❌' : ''}`;
+
+                html += `<tr><td><strong>${dateLabel}</strong></td><td class="shift-cell">${amDisplay}</td><td class="shift-cell">${pmDisplay}</td></tr>`;
+            });
+
+            html += '</tbody></table></div>';
+
+            // Calculate statistics
+            const shiftsArray = Array.from(shiftCounts.values()).filter(c => c > 0);
+            const totalShifts = shiftsArray.reduce((a, b) => a + b, 0);
+            const avgShifts = shiftsArray.length > 0 ? (shiftsArray.reduce((a, b) => a + b) / shiftsArray.length).toFixed(1) : 0;
+            const minShifts = shiftsArray.length > 0 ? Math.min(...shiftsArray) : 0;
+            const maxShifts = shiftsArray.length > 0 ? Math.max(...shiftsArray) : 0;
+
+            html += `<div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value">${state.dateRange.length}</div>
+                    <div class="stat-label">Total Fridays</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${state.people.length}</div>
+                    <div class="stat-label">Total People</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avgShifts}</div>
+                    <div class="stat-label">Avg Shifts/Person</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${minShifts}–${maxShifts}</div>
+                    <div class="stat-label">Shift Range</div>
+                </div>
+            </div>`;
+
+            // Show who has most shifts
+            const maxShiftCount = Math.max(...Array.from(shiftCounts.values()));
+            const topPeople = state.people
+                .filter(p => shiftCounts.get(p.id) === maxShiftCount && maxShiftCount > 0)
+                .map(p => p.name)
+                .join(', ');
+
+            if (topPeople) {
+                html += `<div style="margin-top: 20px; padding: 12px; background: var(--gray-100); border-radius: 4px;">
+                    <strong>Most Shifts:</strong> ${topPeople} (${maxShiftCount} ${maxShiftCount === 1 ? 'shift' : 'shifts'})
+                </div>`;
+            }
+
+            // Individual shift list for each person
+            html += `<div style="margin-top: 20px;">
+                <h3 style="font-size: 1.1em; margin-bottom: 12px;">Shift List by Person</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">`;
+
+            state.people.forEach(person => {
+                const personShifts = [];
+                state.dateRange.forEach(date => {
+                    const dateStr = date.toISOString().split('T')[0];
+                    const dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                    const amKey = `${dateStr}-AM`;
+                    const pmKey = `${dateStr}-PM`;
+
+                    if (schedule.get(amKey).includes(person.name)) {
+                        personShifts.push(`${dateLabel} AM`);
+                    }
+                    if (schedule.get(pmKey).includes(person.name)) {
+                        personShifts.push(`${dateLabel} PM`);
+                    }
+                });
+
+                const shiftList = personShifts.length > 0
+                    ? personShifts.join('<br>')
+                    : '<em style="color: var(--gray-600);">No shifts assigned</em>';
+
+                html += `<div style="background: var(--gray-100); padding: 12px; border-radius: 4px;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">${person.name}</div>
+                    <div style="font-size: 0.9em; line-height: 1.6;">${shiftList}</div>
+                    <div style="font-size: 0.8em; color: var(--gray-600); margin-top: 8px;">Total: ${shiftCounts.get(person.id)} ${shiftCounts.get(person.id) === 1 ? 'shift' : 'shifts'}</div>
+                </div>`;
+            });
+
+            html += '</div></div>';
+
+            container.innerHTML = html;
+        }
+
+        // Event listeners
+        document.getElementById('startDate').addEventListener('change', updateDateCheckboxes);
+        document.getElementById('endDate').addEventListener('change', updateDateCheckboxes);
+
+        // Initialize on load
+        window.addEventListener('load', initializeDates);
+    </script>
+</body>
+</html>
