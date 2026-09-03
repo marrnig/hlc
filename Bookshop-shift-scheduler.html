@@ -4,7 +4,7 @@
 	<link rel="icon" type="image/x-icon" href="LCI_emblem_2color.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shift Scheduler</title>
+    <title>Bookshop Shift Scheduler</title>
     <style>
         * {
             margin: 0;
@@ -493,7 +493,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>📅 Shift Scheduler</h1>
+        <h1>📅 Bookshop Shift Scheduler</h1>
         <p class="subtitle">Create fair, balanced shift schedules with dependency support</p>
 
         <!-- Scheduling Period -->
@@ -574,6 +574,11 @@
 
             <!-- Schedule Panel -->
             <div class="panel">
+
+                <button class="btn btn-primary" onclick="generateSchedule()" style="width: 100%; font-size: 1.05em; padding: 12px;">
+                    ✨ Generate Schedule
+                </button>
+
                 <h2>Schedule</h2>
                 <div id="scheduleContainer" class="empty-state">
                     Add people and click "Generate Schedule" to see results
