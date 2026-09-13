@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookshop Shift Availability</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .section h2 {
+      color: #444;
+      font-size: 16px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #0066cc;
+      padding-bottom: 8px;
+    }
+    .email-input-group {
+      margin-bottom: 15px;
+    }
+    .email-input-group label {
+      display: block;
+      color: #333;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .email-input-group input {
+      width: 100%;
+      max-width: 350px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .email-input-group input:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
+    }
+    .shift-grid {
+      display: grid;
+      gap: 20px;
+    }
+    .friday-group {
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 20px;
+      background: #fafafa;
+    }
+    .friday-date {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .friday-date::before {
+      content: "📅";
+    }
+    .slot-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .slot {
+      border: 1px solid #ddd;
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .slot:hover {
+      border-color: #0066cc;
+      box-shadow: 0 2px 8px rgba(0,102,204,0.1);
+    }
+    .slot-header {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .slot-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: #0066cc;
+    }
+    .slot-toggle label {
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+    }
+    .slot-options {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .slot.available .slot-options {
+      display: block;
+    }
+    .option-group {
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .option-group label {
+      display: block;
+      color: #333;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .option-group input,
+    .option-group select {
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 13px;
+      font-family: inherit;
+      width: 100%;
+    }
+    .option-group input:focus,
+    .option-group select:focus {
+      outline: none;
+      border-color: #0066cc;
+    }
+    .plus1-section {
+      background: #f0f7ff;
+      padding: 10px;
+      border-radius: 3px;
+      margin-top: 10px;
+    }
+    .plus1-section input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 40px;
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: #0066cc;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0052a3;
+      box-shadow: 0 2px 8px rgba(0,102,204,0.3);
+    }
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    .status-message {
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .status-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .spinner {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @media (max-width: 600px) {
+      .slot-pair {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // CHANGE THIS: Update to your deployed backend URL
+    const API_URL = 'https://bookshop-scheduler-api.onrender.com'; // Local testing
+    // const API_URL = 'https://your-api-domain.azurewebsites.net'; // Production
+
+    function AvailabilityForm() {
+      const [email, setEmail] = useState('');
+      const [isLoggedIn, setIsLoggedIn] = useState(false);
+      const [fridays, setFridays] = useState([]);
+      const [availability, setAvailability] = useState({});
+      const [colleagues, setColleagues] = useState([]);
+      const [message, setMessage] = useState(null);
+      const [isSaving, setIsSaving] = useState(false);
+      const [isLoading, setIsLoading] = useState(true);
+
+      // Fetch shifts and colleagues on component mount
+      useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const shiftsRes = await fetch(`${API_URL}/api/shifts`);
+            const colleaguesRes = await fetch(`${API_URL}/api/colleagues`);
+
+            if (!shiftsRes.ok || !colleaguesRes.ok) {
+              throw new Error('Failed to fetch data from server');
+            }
+
+            const shiftsData = await shiftsRes.json();
+            const colleaguesData = await colleaguesRes.json();
+
+            setColleagues(colleaguesData);
+
+            // Extract unique Friday dates and create availability map
+            const fridaySet = new Set();
+            const init = {};
+
+            shiftsData.forEach(shift => {
+              const dateStr = shift.ShiftDate.split('T')[0];
+              fridaySet.add(dateStr);
+
+              const slotId = `${dateStr}-${shift.TimeSlot.toLowerCase()}`;
+              init[slotId] = {
+                available: false,
+                pairWith: '',
+                hasPlus1: false,
+                plus1Name: '',
+              };
+            });
+
+            const fridayDates = Array.from(fridaySet)
+              .sort()
+              .map(d => new Date(d));
+
+            setFridays(fridayDates);
+            setAvailability(init);
+            setIsLoading(false);
+          } catch (error) {
+            console.error('Error fetching data:', error);
+            setMessage({
+              type: 'error',
+              text: `⚠️ Cannot connect to server at ${API_URL}. Make sure backend is running.`,
+            });
+            setIsLoading(false);
+          }
+        };
+
+        fetchData();
+      }, []);
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        if (!email.includes('@')) {
+          setMessage({ type: 'error', text: 'Please enter a valid email address' });
+          return;
+        }
+        setIsLoggedIn(true);
+        setMessage(null);
+      };
+
+      const handleSlotToggle = (slotId) => {
+        setAvailability(prev => ({
+          ...prev,
+          [slotId]: { ...prev[slotId], available: !prev[slotId].available }
+        }));
+      };
+
+      const handlePairChange = (slotId, value) => {
+        setAvailability(prev => ({
+          ...prev,
+          [slotId]: { ...prev[slotId], pairWith: value }
+        }));
+      };
+
+      const handlePlus1Toggle = (slotId) => {
+        setAvailability(prev => ({
+          ...prev,
+          [slotId]: { ...prev[slotId], hasPlus1: !prev[slotId].hasPlus1, plus1Name: '' }
+        }));
+      };
+
+      const handlePlus1NameChange = (slotId, value) => {
+        setAvailability(prev => ({
+          ...prev,
+          [slotId]: { ...prev[slotId], plus1Name: value }
+        }));
+      };
+
+      const handleSave = async () => {
+        setIsSaving(true);
+        setMessage(null);
+
+        try {
+          const response = await fetch(`${API_URL}/api/availability`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, availability }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to save');
+          }
+
+          setMessage({
+            type: 'success',
+            text: `✓ ${data.message}`,
+          });
+        } catch (error) {
+          console.error('Error saving:', error);
+          setMessage({
+            type: 'error',
+            text: `Error: ${error.message}`,
+          });
+        } finally {
+          setIsSaving(false);
+        }
+      };
+
+      if (isLoading) {
+        return (
+          <div className="container">
+            <h1>Bookshop Shift Availability</h1>
+            <div className="status-message status-info">
+              <span className="spinner">⏳</span> Loading shifts...
+            </div>
+          </div>
+        );
+      }
+
+      if (!isLoggedIn) {
+        return (
+          <div className="container">
+            <h1>Bookshop Shift Availability</h1>
+            <p className="subtitle">Sign in to indicate which Friday shifts you're available for</p>
+
+            <div className="section">
+              <form onSubmit={handleLogin}>
+                <div className="email-input-group">
+                  <label htmlFor="email">Your Email Address</label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    autoFocus
+                  />
+                </div>
+                <button type="submit" className="btn-primary">Continue</button>
+              </form>
+              {message && (
+                <div className={`status-message status-${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="container">
+          <h1>Bookshop Shift Availability</h1>
+          <p className="subtitle">Signed in as {email}</p>
+
+          <div className="section">
+            <h2>Select Your Available Shifts</h2>
+
+            <div className="shift-grid">
+              {fridays.map(friday => {
+                const dateStr = friday.toISOString().split('T')[0];
+                const dayName = friday.toLocaleDateString('en-US', { weekday: 'long' });
+                const formatted = friday.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+
+                return (
+                  <div key={dateStr} className="friday-group">
+                    <div className="friday-date">{dayName}, {formatted}</div>
+
+                    <div className="slot-pair">
+                      {['am', 'pm'].map(time => {
+                        const slotId = `${dateStr}-${time}`;
+                        const slot = availability[slotId];
+                        const isAvailable = slot?.available || false;
+
+                        return (
+                          <div key={slotId} className={`slot ${isAvailable ? 'available' : ''}`}>
+                            <div className="slot-header">
+                              {time === 'am' ? '🌅' : '🌆'} {time.toUpperCase()}
+                            </div>
+
+                            <div className="slot-toggle">
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                checked={isAvailable}
+                                onChange={() => handleSlotToggle(slotId)}
+                                id={slotId}
+                              />
+                              <label htmlFor={slotId}>I'm available</label>
+                            </div>
+
+                            {isAvailable && (
+                              <div className="slot-options">
+                                <div className="option-group">
+                                  <label htmlFor={`pair-${slotId}`}>Pair with (optional)</label>
+                                  <select
+                                    id={`pair-${slotId}`}
+                                    value={slot?.pairWith || ''}
+                                    onChange={(e) => handlePairChange(slotId, e.target.value)}
+                                  >
+                                    <option value="">No preference</option>
+                                    {colleagues.map(c => (
+                                      <option key={c.email} value={c.email}>
+                                        {c.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div className="plus1-section">
+                                  <label>
+                                    <input
+                                      type="checkbox"
+                                      checked={slot?.hasPlus1 || false}
+                                      onChange={() => handlePlus1Toggle(slotId)}
+                                    />
+                                    I'm bringing someone (+1)
+                                  </label>
+                                  {slot?.hasPlus1 && (
+                                    <div className="option-group" style={{ marginTop: '8px', marginBottom: 0 }}>
+                                      <input
+                                        type="text"
+                                        placeholder="Their name"
+                                        value={slot?.plus1Name || ''}
+                                        onChange={(e) => handlePlus1NameChange(slotId, e.target.value)}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="button-group">
+            <button
+              className="btn-primary"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save Availability'}
+            </button>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                setIsLoggedIn(false);
+                setEmail('');
+                setMessage(null);
+              }}
+            >
+              Sign Out
+            </button>
+          </div>
+
+          {message && (
+            <div className={`status-message status-${message.type}`}>
+              {message.text}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      <AvailabilityForm />
+    );
+  </script>
+</body>
+</html>
